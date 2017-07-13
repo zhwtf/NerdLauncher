@@ -1,6 +1,7 @@
 package com.bignerdranch.android.nerdlauncher;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
@@ -65,13 +66,14 @@ public class NerdLauncherFragment extends Fragment {
     ，定义一个ViewHolder用来显示activity标签名。另外，ResolveInfo信息需经常使用，
 这里使用成员变量存储它
      */
-    private class ActivityHolder extends RecyclerView.ViewHolder {
+    private class ActivityHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private ResolveInfo mResolveInfo;
         private TextView mNameTextView;
 
         public ActivityHolder(View itemView) {
             super(itemView);
             mNameTextView = (TextView) itemView;
+            mNameTextView.setOnClickListener(this);
         }
 
         public void bindActivity(ResolveInfo resolveInfo) {
@@ -79,6 +81,20 @@ public class NerdLauncherFragment extends Fragment {
             PackageManager pm = getActivity().getPackageManager();
             String appName = mResolveInfo.loadLabel(pm).toString();
             mNameTextView.setText(appName);
+        }
+
+        @Override
+        public void onClick(View v) {
+            ActivityInfo activityInfo = mResolveInfo.activityInfo;
+
+            Intent i = new Intent(Intent.ACTION_MAIN)
+                    .setClassName(activityInfo.applicationInfo.packageName,
+                            activityInfo.name)
+                    //在启动新activity时启动新任务，需要为intent添加一个标志
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            startActivity(i);
+
         }
     }
 
